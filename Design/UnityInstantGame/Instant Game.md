@@ -68,9 +68,9 @@
 
 ## 方案选择建议
 
-​		对于目前平台而言，已经存在大量被 **小游戏快适配** 方案所转化的线上游戏，该方案的成熟性是较高的。在转化上需要花费时间，集中处理的位置通常为资源的异步加载，首包资源优化快速载入首屏画面等处，然而对于平台提供的一些特有的能力而言，本身仍需开发者进行专项的能力迭代。Instant Game 方案对于未使用 Bundle 来异步加载资源的游戏工具能够让游戏在几乎不需代码修改时即在微信小游戏平台真机运行，但未加优化的工程仍存在一些体验上的缺陷，因此对于提升游戏体验而言需要进行一些优化。
+​		~~对于目前平台而言，已经存在大量被 **小游戏快适配** 方案所转化的线上游戏，该方案的成熟性是较高的。在转化上需要花费时间，集中处理的位置通常为资源的异步加载，首包资源优化快速载入首屏画面等处，然而对于平台提供的一些特有的能力而言，本身仍需开发者进行专项的能力迭代。Instant Game 方案对于未使用 Bundle 来异步加载资源的游戏工具能够让游戏在几乎不需代码修改时即在微信小游戏平台真机运行，但未加优化的工程仍存在一些体验上的缺陷，因此对于提升游戏体验而言需要进行一些优化。~~
 
-​		总结的来说，对于大型复杂的游戏而言，无论是选择哪一种方案，都不能在免修改工程的情况下给出最理想的游戏效果，因此根据自己的研发团队选择转化方案进行适配已经专项优化即可。对于小型的休闲游戏而言，选择 Instant Game 方案可以快速进行转化，有效的降低工时，但需注意 CCD 服务的费用预算。
+​		~~总结的来说，对于大型复杂的游戏而言，无论是选择哪一种方案，都不能在免修改工程的情况下给出最理想的游戏效果，因此根据自己的研发团队选择转化方案进行适配已经专项优化即可。对于小型的休闲游戏而言，选择 Instant Game 方案可以快速进行转化，有效的降低工时，但需注意 CCD 服务的费用预算。~~
 
 ## 实践指南
 
@@ -89,6 +89,12 @@ MacOS平台：
 InstantGame Package：
 
 [com.unity.instantgame.zip](https://unity-1258948065.cos.ap-shanghai.myqcloud.com/test/AutoStreamerTest1/Release/Alpha/c301_a9/com.unity.instantgame.zip)
+
+### 安装
+
+​		根据平台下载相应的 Unity 编辑器，其中对于使用 MacOS Unity Hub 选择编辑器位置若提示 “应用程序无效 这不是一个已签名的Unity应用”，则需要在 Unity Hub 界面全程按住 `command` 键完成选择操作。
+
+
 
 ### 开始实践
 
@@ -117,21 +123,37 @@ public void SelectChild(LevelSelectButton levelSelectButton)
 
 #### 2.修改构建设置
 
-（1）修改 `File - Build Settings` 中的平台为 WebGL ，并修改 Texture Compression 为 ASTC，如下图：
+（1）修改 `File - Build Settings` 中的平台为 WebGL ，并修改 **Texture Compression** 为 ASTC，如下图：
 
 <img src="image/20220914-151847.png" alt="20220914-151847" width="50%" />
 
-（2）取消 `Build Settings - Player Settings - Player - Other Settings` 中的 Auto Graphics API 勾选项，并删除 WebGL 2，Lightmap Encoding 变更为 Normal Quality，如下图：
+（2）取消 `Build Settings - Player Settings - Player - Other Settings` 中的 **Auto Graphics API** 勾选项，并删除 WebGL 2，Lightmap Encoding 变更为 **Normal Quality**，如下图：
 
 <img src="image/20220914-152444.png" alt="20220914-152444" width="80%"/>
 
 #### 3.导入 Instant Game 工具包
 
-​		在 Unity Editor 菜单栏 `Windows - Package Manager ` 面板右上角 + 号选择 `Add package from disk` ，窗口中选择下载的 [com.unity.instantgame.zip](https://unity-1258948065.cos.ap-shanghai.myqcloud.com/test/AutoStreamerTest1/Release/Alpha/c301_a9/com.unity.instantgame.zip) 内 package.json 文件。
+​		在 Unity Editor 菜单栏 `Windows - Package Manager ` 面板右上角 + 号选择 `Add package from disk` ，窗口中选择下载的 [com.unity.instantgame.zip](https://unity-1258948065.cos.ap-shanghai.myqcloud.com/test/AutoStreamerTest1/Release/Alpha/c301_a9/com.unity.instantgame.zip) 解压文件内 **package.json** 文件。
 
 #### 4.启用 Auto Streaming 能力
 
-​		在 Unity Editor 菜单栏 `Windows - AutoStreaming - Cfg&Publish` 面板中，勾选 Use Auto Streaming，同时配置 CCD服务，CCD服务 配置请查阅本文档 CCD服务章节。
+​		在 Unity Editor 菜单栏 `Windows - AutoStreaming - Cfg&Publish` 面板中，勾选 **Use Auto Streaming**，同时配置 CCD服务，CCD服务及 APPID 等信息请查阅本文档 **CCD服务章节**。
+
+​		勾选 `Use Font Streaming (Experimental)` 与 `Compressed Cloud Assets` 选项，并正确填写 `Instant Game App ID` 。
+
+- Use Font Streaming ：开启字体资源的 Streaming 能力
+- Compressed Cloud Assets ：开启 CDN 智能压缩功能，可以减少客户端下载量减少客户端运行时内存占用
+
+​		复制 CCD服务 中 `Instant Game App ID` 的 APPID 至面板内，
+
+##### 理解 Bucket 与 Badge
+
+- Bucket 可便于管理同一个 CCD Project 下的多个不同的存储桶，一般可用于同一款游戏工程对不同平台的资源的存储
+- Badge 是建立在 Bucket 下的存储分支，一般可用于不同的游戏版本资源的存储。CCD 会为每一个 Bucket 自动生成名为 `latest` 的 Badge ，每次上传文件，该 Badge 内的资源都将被更新，始终指向最新的资源版本，因此**请勿将资源提交至 `latest` 内**，防止影响已发布的游戏版本内容
+
+#### 5.配置 Texture & Animation Streaming
+
+​		在 `Auto Streaming` 面板中
 
 
 
@@ -251,5 +273,9 @@ public class XXX : MonoBehaviour
 ### CCD服务
 
 ​		CCD 服务是由 Unity Instant Game 统一提供的 CDN 服务，通常而言游戏中被 Auto Streaming 分离的资源将被托管至 CCD 服务，同时 Instant Game 也提供了一个自由的资源目录可供开发者自行上传其他资源内容。
+
+​		前往 [CCD服务](https://developer.cloud.unity.cn/projects/) 控制台，登陆后点击 `Create New Project` 创建项目，进入项目页面后左侧菜单栏 `Content Delivery - Instant Game App ID` 中创建你的项目 APPID，该 APPID 将用于填写至面板内 APPID 一栏，如图：
+
+<img src="image/20220915-203808.png" alt="20220915-203808" width="80%"/>
 
 ​		
