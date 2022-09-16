@@ -90,7 +90,7 @@ InstantGame Package：
 
 [com.unity.instantgame.zip](https://unity-1258948065.cos.ap-shanghai.myqcloud.com/test/AutoStreamerTest1/Release/Alpha/c301_a9/com.unity.instantgame.zip)
 
-### 安装
+### MacOS 安装
 
 ​		根据平台下载相应的 Unity 编辑器，其中对于使用 MacOS Unity Hub 选择编辑器位置若提示 “应用程序无效 这不是一个已签名的Unity应用”，则需要在 Unity Hub 界面全程按住 `command` 键完成选择操作。
 
@@ -149,19 +149,73 @@ public void SelectChild(LevelSelectButton levelSelectButton)
 ##### 理解 Bucket 与 Badge
 
 - Bucket 可便于管理同一个 CCD Project 下的多个不同的存储桶，一般可用于同一款游戏工程对不同平台的资源的存储
-- Badge 是建立在 Bucket 下的存储分支，一般可用于不同的游戏版本资源的存储。CCD 会为每一个 Bucket 自动生成名为 `latest` 的 Badge ，每次上传文件，该 Badge 内的资源都将被更新，始终指向最新的资源版本，因此**请勿将资源提交至 `latest` 内**，防止影响已发布的游戏版本内容
+- Badge 是建立在 Bucket 下的存储分支，一般可用于不同的游戏版本资源的存储。CCD 会为每一个 Bucket 自动生成名为 `latest` 的 Badge ，每次上传文件，该 Badge 内的资源都将被更新，始终指向最新的资源版本，因此 **请勿将资源提交至 `latest` 内**，防止影响已发布的游戏版本内容
 
-#### 5.配置 Texture & Animation Streaming
+#### 5.配置 Streaming
 
-​		在 `Auto Streaming` 面板中
+> 提示：面板支持 **全选快捷键** 批量操作
 
+​		在 `Auto Streaming` 面板中顶部 5 个 Streaming Tab 将用来配置资源的异步自动加载能力，本节将逐一介绍。
 
+- **Texture Streaming**
 
-### 资源压缩处理
+​		配置游戏内纹理资源进行异步自动加载，并可配置 Streaming Placeholder ，该能力支持先 **低清资源** 优先呈现场景内容在运行时首次使用到纹理后引擎后台线程加载 **高清资源** 并自动替换，开发者根据自己游戏需要进行选择。
 
-​		若在 `Auto Streaming - Cfg&Publish` 面板中勾选 `Use AutoStreaming` 选项，则项目底层对于资源加载时将启用该模式运行，
+界面能力描述：
 
+| 功能                      | 描述                                                         |
+| ------------------------- | ------------------------------------------------------------ |
+| Sync Texture              | 搜索 BuildSettings 中的 Scenes 引用到的所有 Texture 资源；   |
+| Force Rebuild             | 勾选后点击Generate AssetBundles，将强制重新生成 texture 的 AssetBundles； |
+| Generate AssetBundles     | 为所有勾选的 texture 生成 AB，每张贴图一个 AB；              |
+| Generate Placeholders     | 为所有勾选的 texture 生成一张低分辨率的替用贴图；对于少数不支持低分辨率贴图的情况（如使用 spine 旧版插件的图集，在代码中读取 size 的贴图，RawImage上使用的贴图），在勾选 Placeholder 之外需要勾选BlurPlaceholder， 从而生成一张同样大小但信息量更少的图片； |
+| ConvertLegacySpritePacker | 将旧式的Sprite packer 图集转换成SpriteAtlas，从而获得streaming支持；**该功能会清理所有sprite上的packing Tag，使用前请对工程做好备份**。 |
 
+<img src="image/20220915-203809.png" alt="20220915-203809" width="100%" />
+
+首次打包步骤：
+
+1. 【可选】对于有图集（旧 Sprite Packer）游戏项目点击 `ConvertLegacySpritePacker` 按钮，将图集转为支持 Auto Streaming 的新格式（SpriteAtlas），重新生成的图集将位于 `Assets/AutoStreamingData/AutoConvert` ；
+2. 点击 `Sync Textures` 扫描项目资源，点击 `Ctrl + A` 可全选资源，对于需要生成 低清资源 提升加载速度的游戏勾选 `Placeholder` ，可单独点击资源查看纹理的转化是否符合预期，点击 `Generate AssetBundles` 即可构建资源 bundle；
+3. 成功构建后点击 AB 表头按照大小排序，取消过小的一些资源（例如小于 5kb 资源，可按住 Shift 多选）使用该能力，再次点击 `Generate AssetBundles` 清理不需要的 AB ；
+4. 最后点击 `Generate Placeholders` 替换项目内资源。
+
+更新操作步骤：
+
+1. 点击 `Sync Textures` 扫描项目资源，调整 `Placeholder` 的勾选项；
+2. 勾选 `Force Rebuild` ；
+3. 点击 `Generate AssetBundles` 重新构建 AB ；
+4. 最后点击 `Generate Placeholders` 替换项目内资源。
+
+- **Audio / Mesh / Animation Streaming**
+
+​		Audio / Mesh / Animation 资源的异步加载，点击 `Sync Audios / Meshes / Animations` 扫描项目内资源，根据需要勾选 `OnDemandDownload` ，值得注意的是由于资源在使用时才开始进行异步加载。尤其音频资源对于一些游戏场景需要及时性的音效首次播放可能存在明显的延迟问题，因此要酌情选择使用该能力。该能力一般可用于较大的背景音乐等不追求及时性的音频资源。其他场景需要开发者手动构建 AA/AB 包完成提前加载。
+
+- **Scene Streaming**
+
+​		选择 `Build Settings` 中的场景，将这些场景自动构建成 AssetBundle ，并托管至 CCD服务器上，对于开发者而言通过 SceneManager 调用 `LoadScene` 或 `LoadSceneAsync` ，底层将自动完成下载与加载。
+
+界面能力描述：
+
+| 功能                 | 描述                                              |
+| -------------------- | ------------------------------------------------- |
+| Sync Scenes          | 获取 Build Settings 中的 Scene ，并在列表中显示； |
+| Force Rebuild        | 勾选后，强制重新构建 Scene 的 AssetBundles；      |
+| Generate AssetBundle | 生成 Scene 以及 共享资源 的 AB；                  |
+| Sync SharedAssets    | 搜索勾选 Streaming 的场景中的共同引用到的资源；   |
+
+​		场景通常将被打成独立的 AB 资源，但被不同场景内引用的资源会被重复打到不同的场景 AB 中，因此对于共享的资源挑出单独打包。被标记 `IsSharedAsset` 的资源将会在**首场景前准备好**，因此不宜过大（小于 5M），建议的资源是：
+
+- 被多个场景引用到的资源，可查看列表 `References` 列包含场景序号较多的资源
+- 本身较大的 shader 等资源
+
+使用步骤：
+
+1. Scene Streaming 依赖 **Texture/Audio/Mesh/Animation/Font Streaming** 配置，因此要优先处理前序操作；
+2. 点击 `Sync Scenes` 扫描场景，根据需要勾选 `OnDemandDownload` 选项；
+3. 点击 `Shared SharedAssets` 扫描共享资源，根据需要勾选 `IsSharedAsset` ；
+4. 若已经构建过，则需勾选 `Force Rebuild` ；
+5. 点击 `Generate ABs` 创建 AB 。
 
 ### AssetsBundle指引
 
