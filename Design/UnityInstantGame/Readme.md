@@ -1,29 +1,31 @@
 # Unity Instant Game导出至微信小游戏指南
 
-​		除 [Unity WebGL小游戏快适配](https://github.com/wechat-miniprogram/minigame-unity-webgl-transform/blob/main/Design/Summary.md) 方案外，Unity 官方也提供了 Instant Game 转换工具可以实现 Unity 游戏转化至微信小游戏平台的能力，本文将对两种方案的转化进行量化指标的对比，方便开发者们根据不同的需要选择适合自己游戏的方案进行接入。
+​		除 [Unity WebGL小游戏快适配](https://github.com/wechat-miniprogram/minigame-unity-webgl-transform/blob/main/Design/Summary.md) 方案外，Unity 官方也提供了 Instant Game 转换工具可以实现 Unity 游戏转化至微信小游戏平台的能力，本文将介绍 Instant Game 工具的转化能力、以及各性能优劣势，并给出基于模板游戏的实践案例，协助开发者更合理的将游戏导入至微信小游戏环境中运行。
 
 本文的内容包括：
 
 - 两者转化差异对比
 - 真机性能测评
 - 方案选择建议
-- Instant Game 导出至微信小游戏实践
+- Instant Game 导出至微信小游戏实践案例（转化指南）
 
 ## 转化差异能力对比
 
-| 指标           | Unity 快适配 | Instant Game工具                 |
-| -------------- | ------------ | -------------------------------- |
-| 转化人力       | 适中         | 较少/适中                        |
-| 懒加载资源类型 | 常见纹理资源 | 纹理、模型、骨骼动画、音频资源   |
-| 纹理压缩格式   | DXT、ASTC    | ASTC                             |
-| 自有CDN        | 支持         | 不支持(腾讯云CCD)                |
-| 必要的代码修改 | 通常需要适配 | 较少编写                         |
-| WebGL          | 1.0、2.0     | 1.0                              |
-| 首包资源处理   | 通常需要     | 默认不需要，但达到最佳效果仍需要 |
+| 指标           | Unity 快适配 | Instant Game工具                |
+| -------------- | ------------ | ------------------------------- |
+| 转化人力       | 适中         | 较少 / 适中                     |
+| 懒加载资源类型 | 常见纹理资源 | 纹理、模型、骨骼动画、音频资源  |
+| 纹理压缩格式   | DXT、ASTC    | ASTC                            |
+| 自有CDN        | 支持         | 不支持(使用腾讯云CDN服务)       |
+| 必要的代码修改 | 通常需要适配 | 较少编写 / 达到最佳仍需适配     |
+| WebGL          | 1.0、2.0     | 1.0                             |
+| 首包资源处理   | 通常需要     | 默认不需要 / 达到最佳效果仍需要 |
+
+​		从上述能力对比可知 Instant Game 工具能够在较少的项目改动下完成项目在微信小游戏上的部署，但这仅限于成功部署，**优质的游戏仍需要提供更好的游戏体验**，因此对于精品游戏而言，开发者仍需要详尽阅读本文理解 Instant Game 工具提供的能力进行专项调优。
 
 ## 性能测评
 
-​		本文针对相同的 Unity 游戏（[Unity塔防模板游戏](https://learn.unity.com/project/ta-fang-mo-ban?uv=2017.2)）进行两种转化方案上的性能进行测评，重点关注首屏呈现效率、帧率、内存、网络请求等进行分析测评。
+​		本节将针对相同的 Unity 游戏（[Unity塔防模板游戏](https://learn.unity.com/project/ta-fang-mo-ban?uv=2017.2)）进行两种转化方案上的性能进行测评，重点关注对于首屏呈现速度，运行时帧率、内存、网络请求等方面的测试，以此来告知开发者 Instant Game 工具对游戏运行状态的影响程度。此外评测中基于 Instant Game 工具转化的游戏未采用任何优化体验方法完成的转化产物，以此来展示未经优化的项目的一些体验上的缺陷（体验缺陷不影响上述性能指标的测试）。
 
 ### 转化差异
 
@@ -38,12 +40,14 @@
 
 ### 游戏首屏幕加载速度
 
-<img src="image/20220914-114538.png" alt="20220914-114538" width="300" />
+​		游戏首屏幕界面的呈现快慢是新用户是否愿意继续体验游戏的关键因素，下方橘色 Loading 界面支持开发者更换更符合游戏自身的主题的图片/视频，首屏幕加载即指用户看见该界面的耗时。
+
+<img src="image/20220914-114538.png" alt="20220914-114538" width="500" />
 
 | 转换方案     | 首屏幕呈现时间 |
 | ------------ | -------------- |
-| Instant Game | ~~12.3s~~      |
-| WeiXin Tool  | ~~4.5s~~       |
+| Instant Game | ~~1s~~         |
+| WeiXin Tool  | ~~1s~~         |
 
 
 
@@ -137,7 +141,7 @@ public void SelectChild(LevelSelectButton levelSelectButton)
 
 #### 4.启用 Auto Streaming 能力
 
-​		在 Unity Editor 菜单栏 `Windows - AutoStreaming - Cfg&Publish` 面板中，勾选 **Use Auto Streaming**，同时配置 CCD服务，CCD服务及 APPID 等信息请查阅本文档 **CCD服务章节**。
+​		在 Unity Editor 菜单栏 `Windows - AutoStreaming - Cfg&Publish` 面板中，勾选 **Use Auto Streaming**，同时配置 CCD服务，CCD服务及 APPID 等信息请查阅本文档 [**CCD服务章节**](#CCD服务)。
 
 ​		勾选 `Use Font Streaming (Experimental)` 与 `Compressed Cloud Assets` 选项，并正确填写 `Instant Game App ID` 。
 
@@ -216,6 +220,52 @@ public void SelectChild(LevelSelectButton levelSelectButton)
 3. 点击 `Shared SharedAssets` 扫描共享资源，根据需要勾选 `IsSharedAsset` ；
 4. 若已经构建过，则需勾选 `Force Rebuild` ；
 5. 点击 `Generate ABs` 创建 AB 。
+
+#### 6.针对 AB、AA 包的处理
+
+​		由于本案例中并未涉及 AB 、AA 包资源的加载与使用，因此实践步骤中暂不介绍，对于使用 AB、AA 包资源的开发者请阅读 [**Assets Bundle指引**](#AssetsBundle指引) 小节完成配置。
+
+#### 7.导入微信Unity - SDK
+
+​		前往文档主页下载安装 [Unity小游戏转换工具和SDK](https://github.com/wechat-miniprogram/minigame-unity-webgl-transform) 插件，并导入至 Unity 工程内，在 Unity 顶部菜单栏点击 `微信小游戏 - 转换小游戏` ，在配置面板中根据指引填写相关信息，其中 `游戏资源CDN` 需要填写 `Auto Streaming - Cfg&Publish` 面板中的 `Auto Straming Path` 内地址。
+
+​		打开 `转换小游戏` 面板后，需要在 Unity 内打开工程文件 `Assets/WX-WASM-SDK/Editor/MiniGameConfig` （若无该文件需打开 `转换小游戏` 面板），在 Unity 的 Inspector 页面中点开 `Project Conf` 修改如下属性值：
+
+- Bundle Path Identifier :  `StreamingAssets;AS;CUS/CustomAB`
+- Data File Sub Prefix : `CUS`
+
+<img src="image/20220915-203810.png" alt="img" width="80%" />
+
+##### 解释：
+
+- StreamingAssets 为微信小游戏默认字段；
+- AS 在使用 Auto Streaming 时为 **必填** 字段；
+- CUS/CustomAB 对应 `CustomCloudAssets/CustomAB` 目录，**使用到时则必须要填写**
+- Data File Sub Prefix 的 CUS 为首资源包下载地址前缀，**必填**。
+
+#### 8.将游戏导出为 WebGL 工程
+
+​		在 `转换小游戏` 面板配置好信息后点击 `导出 WebGL 并转换成小游戏` ，该过程可能花费一段时间，打包过程需安装 Node.js ，请确保安装并正确配置环境变量。
+
+​		导出完成后需将导出目录中的 `webgl` 目录内的由 HASH 头构成的 `.txt` 文件复制到 `CustomCloudAssets` 目录下（此处对应步骤7中 Data File Sub Prefix 的设定意义）。
+
+<img src="image/20220915-203811.png" alt="image-20220919155416257" width="80%" />
+
+#### 9.将资源上传至 CDD 服务
+
+​		 在 `Auto Streaming - Cfg&Publish` 面板中点击 `UploadToCCD` 将所有的资源进行上传。
+
+#### 10.真机运行
+
+​		在 `微信开发者工具` 中导入 `minigame` 目录，前往 **[MP 后台](https://mp.weixin.qq.com/) - 开发管理 - 开发设置 - 服务器域名** 的 `request合法域名` 与 `downloadFile合法域名` 中进行白名单配置，AutoStreaming 工具用到的域名：
+
+- https://assetstreaming-wg-content.unity.cn;
+- https://asset-streaming-wg.cdn.unity.cn;
+- https://asset-streaming-content.unity.cn;
+
+​		最后在开发者工具使用预览/上传体验等功能完成真机运行。
+
+
 
 ### AssetsBundle指引
 
