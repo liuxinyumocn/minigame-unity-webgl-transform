@@ -70,6 +70,10 @@
 
 ​		从图中可知，游戏启动阶段内存 Instant Game 略高于 WeiXin Tool ，但游戏平稳后两者内存占用没有明显差别。
 
+### 网络(Network)
+
+​		待补充
+
 ## 方案选择建议
 
 ​		~~对于目前平台而言，已经存在大量被 **小游戏快适配** 方案所转化的线上游戏，该方案的成熟性是较高的。在转化上需要花费时间，集中处理的位置通常为资源的异步加载，首包资源优化快速载入首屏画面等处，然而对于平台提供的一些特有的能力而言，本身仍需开发者进行专项的能力迭代。Instant Game 方案对于未使用 Bundle 来异步加载资源的游戏工具能够让游戏在几乎不需代码修改时即在微信小游戏平台真机运行，但未加优化的工程仍存在一些体验上的缺陷，因此对于提升游戏体验而言需要进行一些优化。~~
@@ -223,7 +227,7 @@ public void SelectChild(LevelSelectButton levelSelectButton)
 
 #### 6.针对 AB、AA 包的处理
 
-​		由于本案例中并未涉及 AB 、AA 包资源的加载与使用，因此实践步骤中暂不介绍，对于使用 AB、AA 包资源的开发者请阅读 [**Assets Bundle指引**](#AssetsBundle指引) 小节完成配置。
+​		由于本案例中并未涉及 AB 、AA 包资源的加载与使用，因此实践步骤中暂不介绍，对于使用 AB、AA 包资源的开发者请阅读 [**Assets Bundle指引**](#AssetsBundle指引) 与 [**Addressable指引**](#Addressable指引) 小节完成配置。
 
 #### 7.导入微信Unity - SDK
 
@@ -236,7 +240,7 @@ public void SelectChild(LevelSelectButton levelSelectButton)
 
 <img src="image/20220915-203810.png" alt="img" width="80%" />
 
-##### 解释：
+**解释：**
 
 - StreamingAssets 为微信小游戏默认字段；
 - AS 在使用 Auto Streaming 时为 **必填** 字段；
@@ -269,9 +273,9 @@ public void SelectChild(LevelSelectButton levelSelectButton)
 
 ### AssetsBundle指引
 
-​		与微信小游戏快适配方案相同的是，若游戏内逻辑使用了自定义的远程AB包的加载，则不可避免的需要手动对AB包加载部分进行相应的修改，本节将对AB包的加载进行介绍。
+​		与微信小游戏快适配方案相同的是，若游戏内逻辑使用了自定义的远程AB包的加载，则不可避免的需要手动对AB包加载部分进行相应的修改，本节将对 AB包 的加载进行介绍。
 
-​		Auto Streaming 对开发者自己构建的AB包在资源扫描时会对其进行识别，在工程中对这些资源进行低清资源的生成以及替换，在替换后，开发者需要重新对这些 bundle 进行构建，使得生成的 bundle 具备较小的体积，bundle 内原来的高清资源由 CCD 服务自行托管，需要时将异步的加载并更新在游戏的环境内，自定义AB包的运行原理如下图所示。
+​		Auto Streaming 对开发者自己构建的 AB包 在资源扫描时会对其进行识别，在工程中对这些资源进行低清资源的生成以及替换，在替换后，开发者需要重新对这些 bundle 进行构建，使得生成的 bundle 具备较小的体积，bundle 内原来的高清资源由 CCD 服务自行托管，需要时将异步的加载并更新在游戏的环境内，自定义AB包的运行原理如下图所示。
 
 <img src="image/20220913-174524.png" alt="20220913-174524" width="80%" />
 
@@ -287,7 +291,7 @@ string CCD_HEADER = AutoStreaming.CustomCloudAssetsRoot;
 string Uri = CCD_HEADER + "CustomAB/MyBundle01.ab";		//CCD资源地址
 ```
 
-​		游戏内对于本地的Bundle加载的代码需要变更为远程加载，下面给出一种加载案例：
+​		游戏内对于本地的 Bundle 加载的代码需要变更为远程加载，下面给出一种加载案例：
 
 ```c#
 public class XXX : MonoBehaviour
@@ -313,7 +317,7 @@ public class XXX : MonoBehaviour
         }
         AssetBundle manifestbundle = DownloadHandlerAssetBundle.GetContent(uwr);
         AssetBundleManifest abm = manifestbundle?.LoadAsset<AssetBundleManifest>("AssetBundleManifest");
-        var hashName = GetABNamesWithHash(abm);
+        var hashName = GetABNamesWithHash(abm);	//获取字典表
         
       	//从字典表中得到 ab包 完整的资源名（含Hash部分的）
       	var abNmaeWithHash = hashName[abName];
@@ -360,19 +364,21 @@ public class XXX : MonoBehaviour
 
 **总结而言，整体的步骤应为：**
 
-1. 游戏工程先以默认方式构建1次bundle；
+1. 游戏工程先以默认方式构建 1 次bundle；
 2. 在 `Auto Streaming - Cfg&Publish` 面板 `Custom AB Assets` 项点击 `Search AB` 按钮对构建的 bundle 目录扫描；
 3. 在  `Auto Streaming - Texture Streaming` 面板 `Sync Textures` 后根据需要选中资源(支持全选快捷键)  `Generate Placeholaders` + `Generate AssetBundles`
-4. 此时需要重新构建 AB包；
+4. 此时需要重新构建开发者自己的 AB包；
 5. 将 Asset Manifest 文件放至 `CustomCloudAssets` 目录内，其余 AB包 放至 `CustomCloudAssets/CustomAB/` 目录内；
 6. 在`Auto Streaming - Cfg&Publish` 面板内执行 `Upload to CCD` 即完成上传；
-7. 在需要加载 AB包 位置进行代码的修改。
+7. 在需要加载 AB包 位置进行代码的修改（参考上方代码）。
 
 
 
 ### Addressable指引
 
-​		。		
+​		在不做任何优化的情况下，使用 Instant Game 工具转化的小游戏项目实际运行时会发现在切换新的 Scene 的过程中，若 Scene 的 Bundle 体积过大，游戏将处于无反馈的等待状态（后台线程在下载数据），这个等待过程中玩家得不到任何的界面上的反馈。因此对于此类情况，游戏开发者仍然需要进行相应的调优处理。本节将介绍对资源构建成 AA包 后，如何接入 Auto Streaming 加载模式。
+
+
 
 ### CCD服务
 
