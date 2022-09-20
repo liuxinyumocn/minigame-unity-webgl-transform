@@ -380,9 +380,8 @@ public class XXX : MonoBehaviour
 
 ​		在不做任何优化的情况下，使用 Instant Game 工具转化的小游戏项目实际运行时会发现在切换新的 Scene 的过程中，若 Scene 的 Bundle 体积过大，游戏将处于无反馈的等待状态（后台线程在下载数据），这个等待过程中玩家得不到任何的界面上的反馈。因此对于此类情况，游戏开发者仍然需要进行相应的调优处理。本节将介绍对资源构建成 AA包 后，如何接入 Auto Streaming 加载模式。
 
-<video id="video" controls="" preload="none" poster="封面" width="80%">
-      <source id="mp4" src="video/loadingdemo.mp4" type="video/mp4">
-</videos>
+​		<Github 视频无法显示>
+
 > 该视频效果是 [性能评测](#性能评测) 章节中未经任何优化的 Instant Game 游戏转换产物，从视频可以看出新的 Scene 加载中需要漫长的等待资源的下载，期间游戏UI中未给用户任何的交互反馈，因此对于此类情况仍然需要开发者将原本的本地 Load Scene 变更为远程异步加载并给用户合理的进度条反馈。
 
 
