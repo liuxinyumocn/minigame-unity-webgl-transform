@@ -1,0 +1,18 @@
+{
+  "name": "minigame-unity-webgl-transform",
+  "version": "1.0.0",
+  "description": "欢迎使用 Unity WebGL 小游戏适配(转换)方案，本方案设计目的是**降低 Unity 游戏转换到微信小游戏的开发成本**。基于WebAssembly技术，无需更换Unity引擎与重写核心代码的情况下将原有游戏项目适配到微信小游戏。",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "docs:dev": "vitepress dev config",
+    "docs:build": "vitepress build config",
+    "docs:preview": "vitepress preview config",
+    "build": "npm run docs:build"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "vitepress": "^1.0.2"
+  }
+}
